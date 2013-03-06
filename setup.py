@@ -7,7 +7,7 @@ PACKAGE = 'duedate'
 VERSION = '0.0.1'
 
 setup(
-    name=PACKAGE, 
+    name=PACKAGE,
     version=VERSION,
     description='Inherit due date for ticket from milestone due date',
     author="Tomas Pelka, Matej Cepl",
