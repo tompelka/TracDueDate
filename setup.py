@@ -1,11 +1,18 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from setuptools import find_packages, setup
 
+PACKAGE = 'duedate'
+VERSION = '0.0.1'
+
 setup(
-    name='SetCustomField', version='0.1',
-    packages=find_packages(),
-    entry_points = {
-        'trac.plugins': [
-            'setcustomfield = set_custom_field.setcustomfield',
-        ],
-    },
+    name=PACKAGE, 
+    version=VERSION,
+    description='Inherit due date for ticket from milestone due date',
+    author="Tomas Pelka, Matej Cepl",
+    license='GPL',
+    packages=find_packages(exclude=['*.tests*']),
+    entry_points = {'trac.plugins': ['duedate = duedate']},
+    zip_safe = True
 )
