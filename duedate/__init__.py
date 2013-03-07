@@ -7,6 +7,7 @@ from trac.env import Environment
 import logging
 from customfieldadmin.api import CustomFields
 import datetime
+import sys
 
 myenv = Environment('/srv/trac/desktopqe-backlog-test')
 mycfcomp = CustomFields(myenv)
@@ -19,16 +20,21 @@ class FillInTheDefaultDueDate(Component):
         pass
 
     def validate_ticket(self, req, ticket):
-	due_date = ""
+        due_date = ""
+        max_timestamp = 253402290000
         fields = mycfcomp.get_custom_fields()
-	QUERY = "SELECT due FROM milestone WHERE name='%s'" % ticket['milestone']
-        myenv.log.debug("**duedate plugin** fields = %s", fields)
-	myenv.log.debug("**duedate plugin** ticket milestone - %s", ticket['milestone'])
-	for row in myenv.get_read_db().execute(QUERY):
-		due_date = datetime.datetime.fromtimestamp(int(row[0])/1000000).strftime('%Y-%m-%d')
-		myenv.log.debug("**duedate plugin** milestone due - %s", due_date)
-	for group in fields:
-        	for key, val in group.iteritems():
-            		if key == "name" and val == "userfinish":
-                		#group['value'] == ticket.milestone.due_date
-				group['value'] == due_date
+        QUERY = "SELECT due FROM milestone WHERE name='%s'" % ticket['milestone']
+        for row in myenv.get_read_db().execute(QUERY):
+            if int(row[0]) > 0:
+                due_date = datetime.datetime.fromtimestamp(int(row[0])/1000000).strftime('%Y-%m-%d')
+            else:
+                due_date = datetime.datetime.fromtimestamp(max_timestamp).strftime('%Y-%m-%d')
+            myenv.log.debug("**duedate plugin** milestone due - %s", due_date)
+            myenv.log.debug("**duedate plugin** milestone due type - ", type(due_date))
+        for group in fields:
+            for key, val in group.iteritems():
+                if key == "name" and val == "userfinish":
+                    group['value'] = due_date.strip()
+                if key == "name" and val == "usertart":
+                    group['value'] = datetime.datetime.now().strftime('%Y-%m-%d')
+        return []
