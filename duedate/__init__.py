@@ -26,15 +26,18 @@ class FillInTheDefaultDueDate(Component):
         QUERY = "SELECT due FROM milestone WHERE name='%s'" % ticket['milestone']
         for row in myenv.get_read_db().execute(QUERY):
             if int(row[0]) > 0:
-                due_date = datetime.datetime.fromtimestamp(int(row[0])/1000000).strftime('%Y-%m-%d')
+                due_date = datetime.datetime.fromtimestamp(int(row[0])/1000000)
             else:
-                due_date = datetime.datetime.fromtimestamp(max_timestamp).strftime('%Y-%m-%d')
+                due_date = datetime.datetime.fromtimestamp(max_timestamp)
             myenv.log.debug("**duedate plugin** milestone due - %s", due_date)
             myenv.log.debug("**duedate plugin** milestone due type - ", type(due_date))
         for group in fields:
             for key, val in group.iteritems():
                 if key == "name" and val == "userfinish":
-                    group['value'] = due_date.strip()
+                    #group['value'] = due_date.strftime('%Y-%m-%d')
+                    myenv.log.debug("**duedate plugin** due date - %s", group)
+                    group['value'] = due_date
                 if key == "name" and val == "usertart":
-                    group['value'] = datetime.datetime.now().strftime('%Y-%m-%d')
+                    #group['value'] = datetime.datetime.now().strftime('%Y-%m-%d')
+                    group['value'] = datetime.datetime.now()
         return []
