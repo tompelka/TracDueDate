@@ -12,7 +12,7 @@ setup(
     description='Inherit due date for ticket from milestone due date',
     author="Tomas Pelka, Matej Cepl",
     license='GPL',
-    url='http://fedorapeople.org/cgit/mcepl/public_git/set_custom_field.git',
+    url='https://github.com/tompelka/TracDueDate',
     packages=find_packages(exclude=['*.tests*']),
     entry_points = {'trac.plugins': ['duedate = duedate']},
     zip_safe = True
