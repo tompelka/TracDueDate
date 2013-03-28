@@ -3,41 +3,47 @@
 
 from trac.core import Component, implements
 from trac.ticket.api import ITicketManipulator
-from trac.env import Environment
-import logging
-from customfieldadmin.api import CustomFields
+from trac.config import Option
+from trac.ticket.model import Milestone
 import datetime
-import sys
-
-myenv = Environment('/srv/trac/desktopqe-backlog-test')
-mycfcomp = CustomFields(myenv)
-myenv.log.setLevel(logging.DEBUG)
 
 class FillInTheDefaultDueDate(Component):
     implements(ITicketManipulator)
+
+    field = Option('ticket-duedate', 'field', 'userfinish',
+                   doc="Ticket field that contains the ticket due date.")
+
+    ### ITicketManipulator methods
 
     def prepare_ticket(self, req, ticket):
         pass
 
     def validate_ticket(self, req, ticket):
-        due_date = ""
         max_timestamp = 253402290000
-        fields = mycfcomp.get_custom_fields()
-        QUERY = "SELECT due FROM milestone WHERE name='%s'" % ticket['milestone']
-        for row in myenv.get_read_db().execute(QUERY):
-            if int(row[0]) > 0:
-                due_date = datetime.datetime.fromtimestamp(int(row[0])/1000000)
-            else:
-                due_date = datetime.datetime.fromtimestamp(max_timestamp)
-            myenv.log.debug("**duedate plugin** milestone due - %s", due_date)
-            myenv.log.debug("**duedate plugin** milestone due type - ", type(due_date))
-        for group in fields:
-            for key, val in group.iteritems():
-                if key == "name" and val == "userfinish":
-                    #group['value'] = due_date.strftime('%Y-%m-%d')
-                    myenv.log.debug("**duedate plugin** due date - %s", group)
-                    group['value'] = due_date
-                if key == "name" and val == "usertart":
-                    #group['value'] = datetime.datetime.now().strftime('%Y-%m-%d')
-                    group['value'] = datetime.datetime.now()
+        if not ticket.exists and ticket['milestone']:
+            milestone = Milestone(self.env, ticket.values['milestone'])
+            if milestone and milestone.due and \
+                self.field in ticket.values and not ticket.values[self.field]:
+                ticket.values[self.field] = milestone.due.strftime('%Y-%m-%d')
+            if milestone and self.field in ticket.values and not ticket.values[self.field]:
+                ticket.values[self.field] = datetime.datetime.fromtimestamp(max_timestamp)
+
+        return []
+
+class FillInTheDefaultStartDate(Component):
+    implements(ITicketManipulator)
+
+    field = Option('ticket-startdate', 'field', 'userstart',
+                   doc="Ticket field that contains the ticket start date.")
+
+    ### ITicketManipulator methods
+
+    def prepare_ticket(self, req, ticket):
+        pass
+
+    def validate_ticket(self, req, ticket):
+        if not ticket.exists:
+            if self.field in ticket.values and not ticket.values[self.field]:
+                ticket.values[self.field] = datetime.datetime.now().strftime('%Y-%m-%d')
+
         return []

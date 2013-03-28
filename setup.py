@@ -4,7 +4,7 @@
 from setuptools import find_packages, setup
 
 PACKAGE = 'duedate'
-VERSION = '0.0.1'
+VERSION = '0.0.2'
 
 setup(
     name=PACKAGE,
